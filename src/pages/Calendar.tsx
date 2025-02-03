@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { TransactionDetails } from "@/components/TransactionDetails";
 
 export default function Calendar() {
   const { fadeIn } = useAnimations();
@@ -52,6 +53,7 @@ export default function Calendar() {
   const [view, setView] = useState<"month" | "week" | "day">("month");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Récupérer les transactions
   const { data: transactions = [] } = useQuery({
@@ -143,10 +145,49 @@ export default function Calendar() {
     return budgetAlerts;
   }, [budgets, monthlyStats, selectedDate]);
 
+  // Gestionnaire d'ajout de transaction
+  const handleAddTransaction = async (data: {
+    type: TransactionType;
+    amount: number;
+    description: string;
+    category: string;
+    subscription?: {
+      period: SubscriptionPeriod;
+      service: string;
+    };
+  }) => {
+    try {
+      const { error } = await supabase.from("transactions").insert([
+        {
+          ...data,
+          date: selectedDate?.toISOString() || new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          subscription: data.type === "subscription" ? data.subscription : null,
+        },
+      ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Transaction ajoutée",
+        description: "La transaction a été ajoutée avec succès",
+      });
+
+      // Rafraîchir les données
+      queryClient.invalidateQueries(["transactions"]);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la transaction:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter la transaction",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <motion.div {...fadeIn}>
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* En-tête */}
+      <div className="min-h-[calc(100vh-theme(spacing.16))] max-w-full overflow-x-hidden">
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="flex flex-col sm:flex-row gap-4 p-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
@@ -155,7 +196,10 @@ export default function Calendar() {
               
 
               <div className="sm:ml-auto">
-                <AddTransactionDialog defaultDate={selectedDate} />
+                <AddTransactionDialog 
+                  defaultDate={selectedDate} 
+                  onAddTransaction={handleAddTransaction}
+                />
               </div>
             </div>
           </div>
@@ -325,7 +369,8 @@ export default function Calendar() {
                       return (
                         <div
                           key={transaction.id}
-                          className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                          onClick={() => setSelectedTransaction(transaction)}
                         >
                           <div className="min-w-0 flex-1 mr-4">
                             <p className="font-medium truncate">
@@ -385,6 +430,11 @@ export default function Calendar() {
           </div>
         </div>
       </div>
+      <TransactionDetails
+        transaction={selectedTransaction}
+        open={!!selectedTransaction}
+        onOpenChange={(open) => !open && setSelectedTransaction(null)}
+      />
     </motion.div>
   );
 }

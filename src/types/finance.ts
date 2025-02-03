@@ -1,4 +1,5 @@
-export type TransactionType = "income" | "expense";
+export type TransactionType = "income" | "expense" | "subscription";
+export type SubscriptionPeriod = "free_trial" | "monthly" | "yearly";
 
 export interface Transaction {
   id: string;
@@ -9,6 +10,11 @@ export interface Transaction {
   category: string;
   date: string;
   created_at: string;
+  note?: string;
+  subscription?: {
+    period: SubscriptionPeriod;
+    service: string;
+  };
 }
 
 export interface BalanceData {

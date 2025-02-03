@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { TransactionDetails } from "./TransactionDetails";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -29,6 +30,7 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const handleDelete = async () => {
     try {
@@ -59,8 +61,11 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
   };
 
   return (
-    <Card className="mb-2 rounded-sm">
-      <CardContent className="p-4 flex justify-between items-center">
+    <Card className="mb-2 rounded-sm group hover:shadow-md transition-shadow">
+      <CardContent
+        className="p-4 flex justify-between items-center cursor-pointer"
+        onClick={() => setShowDetails(true)}
+      >
         <div className="flex items-center gap-3">
           <div
             className={`p-2 rounded-full ${
@@ -120,6 +125,11 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <TransactionDetails
+        transaction={transaction}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+      />
     </Card>
   );
 }
