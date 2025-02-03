@@ -81,7 +81,6 @@ const Auth = () => {
   const date = formatDate(new Date());
 
   // Accéder aux paramètres
-  const isDarkMode = settings?.dark_mode;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -113,36 +112,41 @@ const Auth = () => {
             <div className="space-y-6">
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Nom complet</Label>
+                  <Label htmlFor="fullName" className="text-black">Nom complet</Label>
                   <Input
                     id="fullName"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Lamine xxxx"
+                    className="bg-white text-black placeholder:text-gray-400"
                     required
                   />
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-black">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white text-black placeholder:text-gray-400"
+                  placeholder="exemple@email.com"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password" className="text-black">Mot de passe</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white text-black placeholder:text-gray-400"
+                  placeholder="Votre mot de passe"
                   required
                 />
               </div>
