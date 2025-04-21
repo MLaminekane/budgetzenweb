@@ -36,6 +36,7 @@ export type Database = {
         };
         Relationships: [];
       };
+      //Table profiles
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -63,7 +64,8 @@ export type Database = {
         };
         Relationships: [];
       };
-      transactions: {
+      //Table transactions
+        transactions: {
         Row: {
           amount: number;
           category: string;

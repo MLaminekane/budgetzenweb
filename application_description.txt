@@ -1,0 +1,76 @@
+# BudgetZen - Application de Gestion de Budget
+
+## Description Générale
+BudgetZen est une application web moderne de gestion de budget personnelle qui permet aux utilisateurs de suivre leurs dépenses, leurs revenus et de gérer leurs budgets de manière efficace et intuitive.
+
+## Fonctionnalités Principales
+
+### 1. Gestion des Profils Utilisateurs
+- Création et gestion de compte utilisateur
+- Personnalisation du profil (nom, email, photo de profil)
+- Paramètres utilisateur personnalisables (devise, thème, notifications)
+
+### 2. Suivi des Transactions
+- Enregistrement des transactions (dépenses et revenus)
+- Catégorisation des transactions
+- Historique détaillé avec dates et descriptions
+- Filtrage et recherche des transactions
+- Visualisation des tendances de dépenses
+
+### 3. Gestion des Budgets
+- Création de budgets par catégorie
+- Suivi des dépenses par rapport aux budgets
+- Alertes lorsque les budgets sont dépassés
+- Budgets mensuels et annuels
+- Visualisation des progrès budgétaires
+
+### 4. Catégorisation
+- Catégories personnalisables
+- Organisation des dépenses par catégorie
+- Statistiques par catégorie
+- Rapports détaillés
+
+### 5. Paramètres et Personnalisation
+- Choix de devise (CAD par défaut)
+- Thème personnalisable (clair, sombre, système)
+- Gestion des notifications
+- Préférences de confidentialité
+
+## Aspects Techniques
+
+### Sécurité
+- Authentification sécurisée
+- Chiffrement des données sensibles
+- Contrôle d'accès au niveau des données (RLS)
+- Protection des informations personnelles
+
+### Architecture
+- Base de données relationnelle (Oracle/PostgreSQL)
+- API RESTful
+- Interface utilisateur moderne et réactive
+- Synchronisation en temps réel
+
+### Fonctionnalités Avancées
+- Création automatique de profil à l'inscription
+- Mise à jour automatique des timestamps
+- Réinitialisation des données utilisateur
+- Vues sécurisées pour l'accès aux données
+
+## Points Forts
+1. **Simplicité d'utilisation** : Interface intuitive et facile à prendre en main
+2. **Sécurité** : Protection avancée des données utilisateur
+3. **Flexibilité** : Personnalisation complète des paramètres
+4. **Complétude** : Toutes les fonctionnalités essentielles pour la gestion de budget
+5. **Performance** : Optimisation des requêtes et de l'accès aux données
+
+## Public Cible
+- Particuliers souhaitant gérer leur budget personnel
+- Familles cherchant à suivre leurs dépenses
+- Étudiants gérant leurs finances
+- Toute personne souhaitant avoir une meilleure visibilité sur ses finances
+
+## Objectifs
+1. Aider les utilisateurs à mieux comprendre leurs habitudes de dépenses
+2. Faciliter la planification budgétaire
+3. Réduire le stress lié à la gestion des finances
+4. Promouvoir une meilleure santé financière

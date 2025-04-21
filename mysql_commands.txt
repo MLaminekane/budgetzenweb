@@ -1,0 +1,161 @@
+-- =============================================
+-- ÉTAPE 1 : CRÉATION DES TABLES PRINCIPALES
+-- =============================================
+
+-- Table des profils utilisateurs
+CREATE TABLE profiles (
+  id BINARY(16) PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  full_name VARCHAR(255),
+  avatar_url VARCHAR(1000),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+  FOREIGN KEY (id) REFERENCES auth_users(id) ON DELETE CASCADE
+);
+
+-- Table des transactions
+CREATE TABLE transactions (
+  id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+  user_id BINARY(16) NOT NULL,
+  type ENUM('income', 'expense') NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  description TEXT NOT NULL,
+  category VARCHAR(255) NOT NULL,
+  transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
+);
+
+-- Table des budgets
+CREATE TABLE budgets (
+  id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+  user_id BINARY(16) NOT NULL,
+  category VARCHAR(255) NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  period ENUM('monthly', 'yearly') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
+);
+
+-- =============================================
+-- ÉTAPE 2 : VUES POUR LA SÉCURITÉ
+-- =============================================
+
+-- Vue sécurisée pour les profils
+CREATE OR REPLACE VIEW secure_profiles AS
+SELECT * FROM profiles
+WHERE id = @user_id;
+
+-- Vue sécurisée pour les transactions
+CREATE OR REPLACE VIEW secure_transactions AS
+SELECT * FROM transactions
+WHERE user_id = @user_id;
+
+-- Vue sécurisée pour les budgets
+CREATE OR REPLACE VIEW secure_budgets AS
+SELECT * FROM budgets
+WHERE user_id = @user_id;
+
+-- =============================================
+-- ÉTAPE 3 : TRIGGERS ET FONCTIONS
+-- =============================================
+
+-- Trigger pour la mise à jour du timestamp
+DELIMITER //
+CREATE TRIGGER update_profiles_updated_at
+BEFORE UPDATE ON profiles
+FOR EACH ROW
+BEGIN
+    SET NEW.updated_at = CURRENT_TIMESTAMP;
+END//
+DELIMITER ;
+
+-- Trigger pour créer un profil
+DELIMITER //
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth_users
+FOR EACH ROW
+BEGIN
+    INSERT INTO profiles (id, email, full_name)
+    VALUES (NEW.id, NEW.email, NEW.full_name);
+END//
+DELIMITER ;
+
+-- =============================================
+-- ÉTAPE 4 : CONFIGURATION UTILISATEUR
+-- =============================================
+
+-- Table des paramètres utilisateur
+CREATE TABLE user_settings (
+    user_id BINARY(16) PRIMARY KEY,
+    currency VARCHAR(3) DEFAULT 'CAD',
+    notifications JSON DEFAULT ('{"expenses": true, "subscriptions": true, "budgets": true}'),
+    theme VARCHAR(20) DEFAULT 'system',
+    avatar_url VARCHAR(1000),
+    FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
+);
+
+-- Table des catégories
+CREATE TABLE categories (
+    id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+    user_id BINARY(16) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_category_name (user_id, name)
+);
+
+-- =============================================
+-- ÉTAPE 5 : PROCÉDURES STOCKÉES
+-- =============================================
+
+-- Procédure pour réinitialiser les données utilisateur
+
+CREATE PROCEDURE reset_user_data(IN p_user_id BINARY(16))
+BEGIN
+    START TRANSACTION;
+    
+    DELETE FROM transactions WHERE user_id = p_user_id;
+    DELETE FROM budgets WHERE user_id = p_user_id;
+    DELETE FROM categories WHERE user_id = p_user_id;
+    
+    UPDATE user_settings 
+    SET currency = 'CAD',
+        notifications = JSON_OBJECT('expenses', true, 'subscriptions', true, 'budgets', true),
+        theme = 'system'
+    WHERE user_id = p_user_id;
+    
+    COMMIT;
+END
+DELIMITER ;
+
+-- =============================================
+-- ÉTAPE 6 : CONFIGURATION SUPPLÉMENTAIRE
+-- =============================================
+
+-- Création des index
+CREATE UNIQUE INDEX idx_user_settings_user_id ON user_settings(user_id);
+
+-- Création des vues sécurisées pour les paramètres
+CREATE OR REPLACE VIEW secure_user_settings AS
+SELECT * FROM user_settings
+WHERE user_id = @user_id;
+
+-- Création des vues sécurisées pour les catégories
+CREATE OR REPLACE VIEW secure_categories AS
+SELECT * FROM categories
+WHERE user_id = @user_id;
+
+-- =============================================
+-- ÉTAPE 7 : SÉCURITÉ
+-- =============================================
+
+-- Création des utilisateurs et des privilèges
+CREATE USER 'budgetzen_app'@'localhost' IDENTIFIED BY 'mot_de_passe_securise';
+GRANT SELECT, INSERT, UPDATE, DELETE ON budgetzen.* TO 'budgetzen_app'@'localhost';
+
+-- Création des rôles
+CREATE ROLE 'budgetzen_user';
+GRANT SELECT ON budgetzen.secure_* TO 'budgetzen_user';
+GRANT EXECUTE ON PROCEDURE budgetzen.reset_user_data TO 'budgetzen_user'; 
+

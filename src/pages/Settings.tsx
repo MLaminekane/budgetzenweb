@@ -154,9 +154,9 @@ export default function Settings() {
       setIsLoading(true);
 
       // 1. Vérifier la taille et le type du fichier
-      if (file.size > 2 * 1024 * 1024) {
-        // 2MB max
-        throw new Error("L'image est trop volumineuse. Taille maximum: 2MB");
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB max
+        throw new Error("L'image est trop volumineuse. Taille maximum: 5MB");
       }
 
       const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];

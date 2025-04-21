@@ -41,7 +41,7 @@ const Auth = () => {
       setError("Le nom complet est requis");
       return;
     }
-
+    //l'authentification
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -64,6 +64,7 @@ const Auth = () => {
     e.preventDefault();
     setError(null);
 
+    //la connexion
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
